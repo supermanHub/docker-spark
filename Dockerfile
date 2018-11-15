@@ -1,7 +1,8 @@
 FROM centos:latest
 
-ENV SPARK_VERSION=2.4.0
-ENV HADOOP_VERSION=2.7
+ARG SPARK_VERSION=2.4.0
+ARG HADOOP_VERSION=2.7
+ENV SPARK_LOG_DIR=/spark/logs
 
 RUN yum update -y && \
   yum install -y openssh-clients openssh-server java-1.8.0-openjdk && yum clean all && \

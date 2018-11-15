@@ -2,9 +2,11 @@ version: "3.6"
 services:
   master:
     image: mengluo668/spark
-    command: /bin/bash -c "sbin/start-all.sh && daemonize"
+    command: /bin/bash -c "sbin/start-master.sh && daemonize"
     hostname: master.idianyou.com
     container_name: master.idianyou.com
+    environment:
+      - FAIL_FAST=true
     volumes:
       - ${PWD}/slaves:/spark/conf/slaves
     ports:
@@ -18,8 +20,6 @@ services:
     command: "daemonize"
     hostname: slave1.idianyou.com
     container_name: slave1.idianyou.com
-    environment:
-      - SPARK_LOCAL_HOSTNAME=slave1.idianyou.com
     ports:
       - 8081:8081
     networks: 

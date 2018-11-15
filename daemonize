@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 echo "Here is daemonize"
 
@@ -9,7 +9,37 @@ cleanup() {
 
 trap cleanup SIGINT SIGTERM
 
+runingDaemons=
+sparkDaemons=("org.apache.spark.deploy.master.Master"  "org.apache.spark.deploy.worker.Worker")
+
+
 while sleep 10; do
   wait $!
-  echo "deamonize"
+  echo ""
+  echo "========================Start to scan spark daemons...========================"
+
+  index=0
+  for sd in "${sparkDaemons[@]}"; do 
+    ps aux |grep -v grep |grep $sd -q 
+    DAEMON_STATUS=$?
+    if [ $DAEMON_STATUS -ne 0 ]; then
+      echo "INFO: Spark daemon [$sd] is not running..."
+      # If the spark deamon is lost and FAIL_FAST is true
+      # then we consider an error occurred and exit!
+      for rd in "${runingDaemons[@]}"; do
+        if [[ "$rd" == "$sd" ]]; then
+          echo "ERROR: Spark daemon [$sd] is lost."
+          if [[ "$FAIL_FAST" == "true" ]]; then
+            cat ${SPARK_LOG_DIR}/*.out
+            echo "FAIL_FAST is enabled, exit(1)"
+            exit 1
+          fi
+        fi
+      done
+    else
+      runingDaemons[$index]=$sd
+      echo "INFO: Detect a running spark daemon [$sd]"
+    fi
+    index=$((index+1))
+  done
 done
