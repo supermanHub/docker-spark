@@ -9,7 +9,7 @@ cleanup() {
 
 trap cleanup SIGINT SIGTERM
 
-while sleep 1; do
+while sleep 10; do
   wait $!
   echo "deamonize"
 done
